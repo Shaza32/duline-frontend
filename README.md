@@ -18,3 +18,4 @@ Mobile application built with Flutter for the Duline family task management syst
 
 flutter pub get
 flutter run
+![Uploading image.png…]()
