@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "971461435297",
+    "project_id": "nestly-db1cf",
+    "storage_bucket": "nestly-db1cf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:971461435297:android:9332c35c24e7bb1d33b5e0",
+        "android_client_info": {
+          "package_name": "at.nestly.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHKLwqREwKxBl2AFZYZPUF0r-zJoTNlzg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
