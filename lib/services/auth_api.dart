@@ -110,17 +110,17 @@ class AuthApi {
       body: jsonEncode({'refreshToken': refreshToken}),
     );
 
-    debugPrint('REFRESH status=${res.statusCode} body=${res.body}');
+debugPrint('REFRESH status=${res.statusCode}');
 
     if (res.statusCode != 200) {
-      throw Exception('Refresh failed: ${res.statusCode} ${res.body}');
+      throw Exception('Refresh failed: ${res.statusCode}');
     }
 
     final data = jsonDecode(res.body) as Map<String, dynamic>;
     final token = (data['accessToken'] ?? '') as String;
 
     if (token.isEmpty) {
-      throw Exception('Refresh returned empty accessToken. Body=${res.body}');
+      throw Exception('Refresh returned empty accessToken');
     }
 
     return token;
@@ -168,6 +168,6 @@ class AuthApi {
       throw Exception('Reset failed');
     }
   }
-
+ 
 
 }
