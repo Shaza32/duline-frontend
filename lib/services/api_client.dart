@@ -111,7 +111,6 @@ class ApiClient {
     debugPrint('---- SENDING REQUEST ----');
     // اطبعي الهيدر اللي رح يطلع من _headers()
     final hh = _headers();
-    debugPrint('Auth header = ${hh['Authorization']}');
     debugPrint('-------------------------');
 
     final res = await request();
@@ -125,7 +124,6 @@ class ApiClient {
 
     debugPrint('After refresh -> trying again...');
     final hh2 = _headers();
-    debugPrint('Auth header (retry) = ${hh2['Authorization']}');
 
     final retry = await request();
     debugPrint('Retry status: ${retry.statusCode}');
