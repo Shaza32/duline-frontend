@@ -1,8 +1,6 @@
 // lib/services/task_api.dart
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
-
 import '../models/family_task.dart';
 import 'api_client.dart';
 
@@ -13,7 +11,6 @@ class TaskApi {
   /// GET /api/tasks?groupId=...
   Future<List<FamilyTask>> getTasks(int groupId) async {
     final res = await client.get('/api/tasks?groupId=$groupId');
-    debugPrint('TASKS BODY = ${res.body}');
 
     if (res.statusCode == 200) {
       final list = jsonDecode(res.body) as List<dynamic>;
@@ -21,7 +18,7 @@ class TaskApi {
           .map((e) => FamilyTask.fromJson(e as Map<String, dynamic>))
           .toList();
     }
-    throw Exception('Failed to load tasks: ${res.statusCode} ${res.body}');
+       throw Exception('Failed to load tasks: ${res.statusCode}');
   }
 
   /// POST /api/tasks?groupId=...
@@ -41,7 +38,7 @@ class TaskApi {
     if (res.statusCode == 200 || res.statusCode == 201) {
       return FamilyTask.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
     }
-    throw Exception('Create task failed: ${res.statusCode} ${res.body}');
+    throw Exception('Create task failed: ${res.statusCode}');
   }
 
   /// PUT /api/tasks/{id}/take?groupId=...
@@ -54,7 +51,7 @@ class TaskApi {
     if (res.statusCode == 200) {
       return FamilyTask.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
     }
-    throw Exception('Take task failed: ${res.statusCode} ${res.body}');
+    throw Exception('Take task failed: ${res.statusCode}');
   }
 
   /// PUT /api/tasks/{id}/release?groupId=...
@@ -67,7 +64,7 @@ class TaskApi {
     if (res.statusCode == 200) {
       return FamilyTask.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
     }
-    throw Exception('Release task failed: ${res.statusCode} ${res.body}');
+    throw Exception('Release task failed: ${res.statusCode}');
   }
 
   /// PUT /api/tasks/{id}/done?groupId=...
@@ -80,7 +77,7 @@ class TaskApi {
     if (res.statusCode == 200) {
       return FamilyTask.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
     }
-    throw Exception('Done failed: ${res.statusCode} ${res.body}');
+    throw Exception('Done failed: ${res.statusCode}');
   }
 
   /// PUT /api/tasks/{id}/undo?groupId=...
@@ -93,7 +90,7 @@ class TaskApi {
     if (res.statusCode == 200) {
       return FamilyTask.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
     }
-    throw Exception('Undo failed: ${res.statusCode} ${res.body}');
+    throw Exception('Undo failed: ${res.statusCode}');
   }
 
   /// DELETE /api/tasks/{id}?groupId=...
@@ -104,7 +101,7 @@ class TaskApi {
     final res = await client.delete('/api/tasks/$taskId?groupId=$groupId');
 
     if (res.statusCode != 200 && res.statusCode != 204) {
-      throw Exception('Delete task failed: ${res.statusCode} ${res.body}');
+      throw Exception('Delete task failed: ${res.statusCode}');
     }
   }
 }
