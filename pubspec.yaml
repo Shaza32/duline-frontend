@@ -39,3 +39,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/Duline_logo.png
+    - assets/duline_logo_new.png
+    - assets/duline_background.png

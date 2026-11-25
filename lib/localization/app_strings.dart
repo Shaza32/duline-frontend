@@ -12,6 +12,7 @@ enum AppLang {
 class AppStrings {
   // ===== Core =====
   final String appTitle;
+  final String appTagline;
   final String setupTitle;
   final String setupHint;
   final String addMemberLabel;
@@ -197,6 +198,7 @@ class AppStrings {
   const AppStrings({
     // Core
     required this.appTitle,
+    required this.appTagline,
     required this.setupTitle,
     required this.setupHint,
     required this.addMemberLabel,
@@ -374,6 +376,7 @@ class AppStrings {
   });
   AppStrings copyWith({
     String? appTitle,
+    String? appTagline,
     String? setupTitle,
     String? setupHint,
     String? addMemberLabel,
@@ -518,6 +521,7 @@ class AppStrings {
   }) {
     return AppStrings(
       appTitle: appTitle ?? this.appTitle,
+      appTagline: appTagline ?? this.appTagline,
       setupTitle: setupTitle ?? this.setupTitle,
       setupHint: setupHint ?? this.setupHint,
       addMemberLabel: addMemberLabel ?? this.addMemberLabel,
@@ -668,7 +672,8 @@ class AppStrings {
 /// ===============================
 const AppStrings _enStrings = AppStrings(
   // Core
-  appTitle: 'AI Family Organizer',
+  appTitle: 'DULINE',
+  appTagline: 'Together. Better organized.',
   setupTitle: 'Family Setup',
   setupHint: 'Add your family members:',
   addMemberLabel: 'Member name',
@@ -707,10 +712,10 @@ const AppStrings _enStrings = AppStrings(
   requiredField: 'Required',
 
   // Login
-  signInBtn: 'SIGN IN →',
+  signInBtn: 'Sign in',
   forgotPassword: 'Forgot password?',
   noAccount: "Don't have an account? ",
-  createNest: 'Create a Nest',
+  createNest: 'Create an account',
   loginInvalidCredentials: 'Invalid email or password',
 
   // Forgot password
@@ -852,7 +857,8 @@ const AppStrings _enStrings = AppStrings(
 // German (DE) - partial, fallback to EN
 // ===============================
 final AppStrings _deStrings = _enStrings.copyWith(
-  appTitle: 'AI Familien-Organizer',
+  appTitle: 'DULINE',
+  appTagline: 'Gemeinsam. Besser organisiert.',
   setupTitle: 'Familien-Setup',
   setupHint: 'Füge deine Familienmitglieder hinzu:',
   addMemberLabel: 'Mitgliedsname',
@@ -887,10 +893,10 @@ final AppStrings _deStrings = _enStrings.copyWith(
   passwordLabel: 'PASSWORT',
   requiredField: 'Erforderlich',
 
-  signInBtn: 'ANMELDEN →',
+  signInBtn: 'Anmelden',
   forgotPassword: 'Passwort vergessen?',
   noAccount: 'Kein Konto? ',
-  createNest: 'Nest erstellen',
+  createNest: 'Konto erstellen',
   loginInvalidCredentials: 'E-Mail oder Passwort falsch',
 
   forgotPasswordHint: 'Gib deine E-Mail ein, um einen Code zu erhalten',
@@ -1023,7 +1029,8 @@ final AppStrings _deStrings = _enStrings.copyWith(
 // Arabic (AR) - partial, fallback to EN
 // ===============================
 final AppStrings _arStrings = _enStrings.copyWith(
-  appTitle: 'منظّم العائلة الذكي',
+  appTitle: 'DULINE',
+  appTagline: 'معاً، بتنظيم أفضل.',
   setupTitle: 'إعداد العائلة',
   setupHint: 'أضيفي أفراد العائلة:',
   addMemberLabel: 'اسم العضو',
@@ -1058,7 +1065,7 @@ final AppStrings _arStrings = _enStrings.copyWith(
   passwordLabel: 'كلمة المرور',
   requiredField: 'مطلوب',
 
-  signInBtn: 'تسجيل الدخول →',
+  signInBtn: 'تسجيل الدخول',
   forgotPassword: 'نسيتِ كلمة المرور؟',
   noAccount: 'ما عندك حساب؟ ',
   createNest: 'إنشاء حساب',

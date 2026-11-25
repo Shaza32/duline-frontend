@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/auth_api.dart';
@@ -6,6 +7,11 @@ import '../../state/auth_state.dart';
 import '../main_shell.dart';
 
 import '../../localization/strings_ext.dart';
+
+import '../../theme/app_colors.dart';
+import '../../theme/app_gradients.dart';
+import '../../widgets/gold_button.dart';
+import '../../widgets/app_background.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -25,15 +31,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _familyNameCtrl = TextEditingController();
 
   bool _isLoading = false;
+  bool _showPassword = false;
   String? _error;
 
-  // نفس هوية Login
-  final Color _brandGold = const Color(0xFFD4AF37);
-  final Color _darkBg = const Color(0xFF2F2F2F);
-  final Color _fieldBg = const Color(0xFF3A3A3A);
+  // REGISTRATION LOGIC
 
   Future<void> _submit() async {
+    if (_isLoading) return;
     if (!_formKey.currentState!.validate()) return;
+
+    FocusScope.of(context).unfocus();
 
     setState(() {
       _isLoading = true;
@@ -41,12 +48,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
+      final authState = context.read<AuthState>();
+
       final code = _familyCodeCtrl.text.trim();
       final familyName = _familyNameCtrl.text.trim();
 
       if (code.isNotEmpty && familyName.isNotEmpty) {
         setState(() {
-          _error = context.stringsRead.chooseOnlyOneFamilyCodeOrName;
+          _error =
+              context.stringsRead.chooseOnlyOneFamilyCodeOrName;
           _isLoading = false;
         });
         return;
@@ -60,8 +70,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         familyName: familyName.isEmpty ? null : familyName,
       );
 
-
-      final authState = context.read<AuthState>();
       await authState.setUser(
         id: result.userId.toString(),
         email: result.email,
@@ -74,18 +82,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShell()),
+        MaterialPageRoute(
+          builder: (_) => const MainShell(),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
+
       final msg = e.toString();
+
       final cleaned = msg.contains('Email already in use')
           ? 'Email already in use'
           : msg;
 
-      setState(() => _error = '${context.stringsRead.registerFailedPrefix} $cleaned');
+      setState(() {
+        _error =
+        '${context.stringsRead.registerFailedPrefix} $cleaned';
+      });
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -99,201 +116,332 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  // REGISTRATION DESIGN
+
   @override
   Widget build(BuildContext context) {
     final s = context.strings;
 
-    return Scaffold(
-      backgroundColor: _darkBg,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // زر رجوع بسيط بنفس الستايل
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: Colors.white.withOpacity(0.7),
-                      ),
-                    ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+
+        body: AppBackground(
+          dimOpacity: 0.30,
+
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 16,
+                ),
+
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 420,
                   ),
 
-                  // Logo header (نفس Login)
-                  Image.asset('assets/Duline_logo.png', height: 110),
-                  const SizedBox(height: 12),
-                  Text(
-                    'DULINE',
-                    style: TextStyle(
-                      color: _brandGold,
-                      fontSize: 26,
-                      letterSpacing: 6,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'by HASKI',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
-                      fontSize: 11,
-                      letterSpacing: 2,
-                    ),
-                  ),
+                  child: Form(
+                    key: _formKey,
 
-                  const SizedBox(height: 34),
-
-                  if (_error != null)
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 18),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.red.withOpacity(0.35)),
-                      ),
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(color: Colors.redAccent),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-
-                  _label(s.nameLabel),
-                  _input(
-                    controller: _nameCtrl,
-                    icon: Icons.person_outline,
-                    validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? s.nameRequired : null,
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  _label(s.emailAddressLabel),
-                  _input(
-                    controller: _emailCtrl,
-                    icon: Icons.email_outlined,
-                    validator: (v) =>
-                    (v != null && v.contains('@')) ? null : s.emailInvalid,
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  _label(s.passwordLabel),
-                  _input(
-                    controller: _passwordCtrl,
-                    icon: Icons.lock_outline,
-                    obscure: true,
-                    validator: (v) =>
-                    (v != null && v.length >= 6) ? null : s.passwordMinChars
-                  ),
-
-                  const SizedBox(height: 22),
-
-                  // Family section (بنفس ألوان الصفحة)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.white.withOpacity(0.08)),
-                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          s.familySectionTitle,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 11,
-                            letterSpacing: 1.8,
-                            fontWeight: FontWeight.w600,
+
+                        // BACK BUTTON
+
+                        Align(
+                          alignment:
+                          AlignmentDirectional.centerStart,
+                          child: IconButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            icon: const BackButtonIcon(),
+                            color: AppColors.gold,
                           ),
                         ),
-                        const SizedBox(height: 12),
 
-                        _label(s.familyCodeOptionalLabel),
-                        _input(
-                          controller: _familyCodeCtrl,
-                          icon: Icons.key_outlined,
-                          hint: s.familyCodeHint,
+                        // LOGO
+
+                        Image.asset(
+                          'assets/duline_logo_new.png',
+                          width: 220,
+                          height: 125,
+                          fit: BoxFit.contain,
                         ),
 
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 4),
 
-                        Center(
-                          child: Text(
-                            s.orLabel,
+                        ShaderMask(
+                          shaderCallback: (bounds) {
+                            return AppGradients.gold
+                                .createShader(bounds);
+                          },
+                          child: const Text(
+                            'DULINE',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.35),
-                              letterSpacing: 3,
-                              fontSize: 11,
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 6,
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 8),
 
-                        _label(s.familyNameOptionalLabel),
-                        _input(
-                          controller: _familyNameCtrl,
-                          icon: Icons.group_outlined,
-                          hint: s.familyNameHint,
+                        Text(
+                          s.appTagline,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: AppColors.gold,
+                            fontSize: 12,
+                            letterSpacing: 0.5,
+                          ),
                         ),
+
+                        const SizedBox(height: 26),
+
+                        // ERROR MESSAGE
+
+                        if (_error != null)
+                          Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(
+                              bottom: 18,
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(
+                                alpha: 0.10,
+                              ),
+                              borderRadius:
+                              BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.error.withValues(
+                                  alpha: 0.35,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              _error!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ),
+
+                        // FULL NAME
+
+                        _label(s.nameLabel),
+
+                        _input(
+                          controller: _nameCtrl,
+                          icon: Icons.person_outline,
+                          keyboardType: TextInputType.name,
+                          autofillHints: const [
+                            AutofillHints.name,
+                          ],
+                          validator: (v) =>
+                          (v == null || v.trim().isEmpty)
+                              ? s.nameRequired
+                              : null,
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        // EMAIL
+
+                        _label(s.emailAddressLabel),
+
+                        _input(
+                          controller: _emailCtrl,
+                          icon: Icons.mail_outline,
+                          keyboardType:
+                          TextInputType.emailAddress,
+                          autofillHints: const [
+                            AutofillHints.email,
+                          ],
+                          validator: (v) =>
+                          (v != null && v.contains('@'))
+                              ? null
+                              : s.emailInvalid,
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        // PASSWORD
+
+                        _label(s.passwordLabel),
+
+                        _input(
+                          controller: _passwordCtrl,
+                          icon: Icons.lock_outline,
+                          obscure: !_showPassword,
+                          showToggle: true,
+                          autofillHints: const [
+                            AutofillHints.newPassword,
+                          ],
+                          onToggle: () {
+                            setState(() {
+                              _showPassword = !_showPassword;
+                            });
+                          },
+                          validator: (v) =>
+                          (v != null && v.length >= 6)
+                              ? null
+                              : s.passwordMinChars,
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // OPTIONAL FAMILY SECTION
+
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+
+                          decoration: BoxDecoration(
+                            color: AppColors.surface.withValues(
+                              alpha: 0.92,
+                            ),
+                            borderRadius:
+                            BorderRadius.circular(18),
+                            border: Border.all(
+                              color: AppColors.gold.withValues(
+                                alpha: 0.30,
+                              ),
+                            ),
+                          ),
+
+                          child: Column(
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                            children: [
+
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.groups_outlined,
+                                    color: AppColors.gold,
+                                    size: 23,
+                                  ),
+
+                                  const SizedBox(width: 10),
+
+                                  Expanded(
+                                    child: Text(
+                                      s.familySectionTitle,
+                                      style: const TextStyle(
+                                        color: AppColors.gold,
+                                        fontSize: 13,
+                                        fontWeight:
+                                        FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 18),
+
+                              // JOIN EXISTING GROUP
+
+                              _label(
+                                s.familyCodeOptionalLabel,
+                              ),
+
+                              _input(
+                                controller: _familyCodeCtrl,
+                                icon: Icons.key_outlined,
+                                hint: s.familyCodeHint,
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              // OR DIVIDER
+
+                              Row(
+                                children: [
+                                  const Expanded(
+                                    child: Divider(
+                                      color: AppColors.border,
+                                    ),
+                                  ),
+
+                                  Padding(
+                                    padding:
+                                    const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                    ),
+                                    child: Text(
+                                      s.orLabel,
+                                      style: const TextStyle(
+                                        color:
+                                        AppColors.textSecondary,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+
+                                  const Expanded(
+                                    child: Divider(
+                                      color: AppColors.border,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              // CREATE NEW GROUP
+
+                              _label(
+                                s.familyNameOptionalLabel,
+                              ),
+
+                              _input(
+                                controller: _familyNameCtrl,
+                                icon: Icons.group_outlined,
+                                hint: s.familyNameHint,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 28),
+
+                        // CREATE ACCOUNT BUTTON
+
+                        GoldButton(
+                          text: s.createAccountBtn,
+                          onPressed: _submit,
+                          isLoading: _isLoading,
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // COMPANY BRANDING
+
+                        const Text(
+                          'by HASKI',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                            letterSpacing: 3,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 22),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _brandGold,
-                        foregroundColor: _darkBg,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                          : Text(
-                        s.createAccountBtn,
-                        style: const TextStyle(
-                          letterSpacing: 1.4,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 22),
-
-                  Text(
-                    'HASKI TECH SOLUTIONS',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.15),
-                      fontSize: 10,
-                      letterSpacing: 3,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -302,42 +450,121 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _label(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 6),
-    child: Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.6),
-          fontSize: 11,
-          letterSpacing: 1.5,
+  // INPUT LABEL
+
+  Widget _label(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 9),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 12,
+            letterSpacing: 0.8,
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
+
+  // INPUT FIELD
 
   Widget _input({
     required TextEditingController controller,
     required IconData icon,
     bool obscure = false,
+    bool showToggle = false,
     String? hint,
+    VoidCallback? onToggle,
     String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    Iterable<String>? autofillHints,
   }) {
     return TextFormField(
       controller: controller,
       obscureText: obscure,
       validator: validator,
-      style: const TextStyle(color: Colors.white),
+      keyboardType: keyboardType,
+      autofillHints: autofillHints,
+      cursorColor: AppColors.gold,
+
+      style: const TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 15,
+      ),
+
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
-        prefixIcon: Icon(icon, color: _brandGold, size: 18),
+
+        hintStyle: const TextStyle(
+          color: AppColors.textSecondary,
+          fontSize: 13,
+        ),
+
         filled: true,
-        fillColor: _fieldBg,
+        fillColor: AppColors.surface,
+
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 17,
+        ),
+
+        prefixIcon: Icon(
+          icon,
+          color: AppColors.gold,
+          size: 21,
+        ),
+
+        suffixIcon: showToggle
+            ? IconButton(
+          onPressed: onToggle,
+          icon: Icon(
+            obscure
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
+            color: AppColors.textSecondary,
+            size: 20,
+          ),
+        )
+            : null,
+
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            color: AppColors.border,
+          ),
+        ),
+
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            color: AppColors.border,
+          ),
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            color: AppColors.gold,
+            width: 1.4,
+          ),
+        ),
+
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            color: AppColors.error,
+          ),
+        ),
+
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            color: AppColors.error,
+            width: 1.4,
+          ),
         ),
       ),
     );
